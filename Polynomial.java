@@ -1,21 +1,22 @@
 import java.util.*;
 //
 
-//Kinda feels like if it was at least trying to work... i guess
+//gives you precise roots and all
+// but haven't tested if those are all the roots there are...
 
 //
 public class Polynomial{
 
-    public ArrayList<Float> Coefficients;
+    public ArrayList<Double> Coefficients;
     
     public Polynomial()
     {
-        Coefficients= new ArrayList<Float>();
+        Coefficients= new ArrayList<Double>();
     }
     
-    public Polynomial(Float... a)
+    public Polynomial(Double... a)
     {
-        Coefficients = new ArrayList<Float>(Arrays.asList(a));
+        Coefficients = new ArrayList<Double>(Arrays.asList(a));
     }
     private void adjust()
     {
@@ -24,17 +25,17 @@ public class Polynomial{
             Coefficients.remove(Coefficients.size()-1);
         }
     }
-    public void addCoefficient(float a)
+    public void addCoefficient(Double a)
     {
         Coefficients.add(a);
     }
-    public float getCoefficient(int k) 
+    public Double getCoefficient(int k) 
     {
         if(k>deg())
             throw new ArrayIndexOutOfBoundsException("za duży indeks, frajerze");
         return Coefficients.get(k);
     }
-    public void setCoefficient(int k,float a)
+    public void setCoefficient(int k,Double a)
     {
         if(k>deg())
             throw new ArrayIndexOutOfBoundsException("za duży indeks, frajerze");
@@ -51,11 +52,11 @@ public class Polynomial{
         return Coefficients.size()-1;
     }
     
-    public float value(Float x)
+    public Double value(Double x)
     {
         adjust();
-        float val=0;
-        float x_pow=1;
+        Double val=0.0;
+        Double x_pow=1.0;
         for(int i = 0; i< Coefficients.size(); i++)
         {
             val+=(x_pow* Coefficients.get(i));
@@ -64,7 +65,7 @@ public class Polynomial{
         return val;
     }
 
-    public void addConst(float a)
+    public void addConst(Double a)
     {
         adjust();
         for(int i = 0; i< Coefficients.size(); i++)
@@ -74,7 +75,7 @@ public class Polynomial{
         adjust();
     }
 
-    public void multiplyByConst(float a)
+    public void multiplyByConst(Double a)
     {
         adjust();
         for(int i = 0; i< Coefficients.size(); i++)
@@ -89,7 +90,7 @@ public class Polynomial{
         adjust();
         while(Coefficients.size()<P.Coefficients.size())
         {
-            Coefficients.add(0.f);
+            Coefficients.add((Double)0.0);
         }
         for(int i = 0; i<Math.min(Coefficients.size(),P.Coefficients.size()); i++)
         {
@@ -103,7 +104,7 @@ public class Polynomial{
         adjust();
         while(Coefficients.size()<P.Coefficients.size())
         {
-            Coefficients.add(0.f);
+            Coefficients.add((Double)0.0);
         }
         for(int i = 0; i<Math.min(Coefficients.size(),P.Coefficients.size()); i++)
         {
@@ -122,19 +123,19 @@ public class Polynomial{
         q.adjust();
         return q;
     }
-    public Float[] roots()
+    public Double[] roots()
     {
         adjust();
         
-        int NumberOfIterations=30;//probably optimal ~ 30
+        int NumberOfIterations=50;//probably optimal ~ 30
         
         if((deg())<=0){
-            return new Float[0];
+            return new Double[0];
         }
         Polynomial q=derivative();
-        Float[] l = q.roots();
-        if(l.length==0){//if  monotonic
-            float p=-1.f,r=1.f;
+        Double[] DerivRoots = q.roots();
+        if(DerivRoots.length==0){//if  monotonic
+            Double p=-1.0,r=1.0;
             for(int i=0;i<((NumberOfIterations*2)/3) && Math.signum(value(p))==Math.signum(value(r)); i++)
             //searching for p and r such that there is x in <p,r> and W(x) = 0
             {
@@ -142,12 +143,12 @@ public class Polynomial{
                 p*=2;
             }
             if(Math.signum(value(p))==Math.signum(value(r))){//if there werent such x
-                return new Float[0];
+                return new Double[0];
             }
-            Float[] ret=new Float[1];
+            Double[] ret=new Double[1];
             for(int i=0;i<NumberOfIterations;i++)//binsearch for x
             {
-                float x=(p+r)/2;
+                Double x=(p+r)/2;
                 if(Math.signum(value(p))==Math.signum(value(x)))
                     p=x;
                 else
@@ -158,35 +159,35 @@ public class Polynomial{
             return ret;
         }
         //find additional points on edges such that they are on the other side of zero than fist and last derivative root
-        float p=-1.f,r=1.f;
+        Double p=-1.0,r=1.0;
         //searching for p and r such that there is x in <p , DRoots[0]> and W(x) = 0
         for(int i=0;i<((NumberOfIterations*2)/3) &&Math.signum(value(DerivRoots[0]))==Math.signum(value(DerivRoots[0]+p));i++)
         {
             p*=2;
         }
         //searching for p and r such that there is x in <DRoots[last] , r> and W(x) = 0
-        for(int i=0;i<((NumberOfIterations*2)/3) &&Math.signum(value(DerivRoots[l.length-1]))==Math.signum(value(DerivRoots[l.length-1]+r));i++)
+        for(int i=0;i<((NumberOfIterations*2)/3) &&Math.signum(value(DerivRoots[DerivRoots.length-1]))==Math.signum(value(DerivRoots[DerivRoots.length-1]+r));i++)
         {
             r*=2;
         }
-        //System.out.printf("p %f r %f\n",DerivRoots[0]+p,DerivRoots[l.length-1]+r);
+        //System.out.printf("p %f r %f\n",DerivRoots[0]+p,DerivRoots[DerivRoots.length-1]+r);
         
-        ArrayList<Float> IntrPoints=new ArrayList<Float>();// points of interest - if there are roots they are between them
+        ArrayList<Double> IntrPoints=new ArrayList<Double>();// points of interest - if there are roots they are between them
         if(Math.signum(value(DerivRoots[0]))!=Math.signum(value(DerivRoots[0]+p)))
         {
             IntrPoints.add(DerivRoots[0]+p);
         }
-        for(int i=0;i< l.length;i++)
+        for(int i=0;i< DerivRoots.length;i++)
         {
             IntrPoints.add(DerivRoots[i]);
         }
-        if(Math.signum(value(DerivRoots[l.length-1]))!=Math.signum(value(DerivRoots[l.length-1]+r)))
+        if(Math.signum(value(DerivRoots[DerivRoots.length-1]))!=Math.signum(value(DerivRoots[DerivRoots.length-1]+r)))
         {
-            IntrPoints.add(DerivRoots[l.length-1]+r);
+            IntrPoints.add(DerivRoots[DerivRoots.length-1]+r);
         }
         //
         //finding roots
-        ArrayList<Float> Roots=new ArrayList<Float>();
+        ArrayList<Double> Roots=new ArrayList<Double>();
         for(int i=0;i<IntrPoints.size()-1;i++)
         {
             p=IntrPoints.get(i);
@@ -195,7 +196,7 @@ public class Polynomial{
             {
                 for(int j=0;j<NumberOfIterations;j++)//binsearch for root
                 {
-                    float x=(p+r)/2;
+                    Double x=(p+r)/2;
                     if(Math.signum(value(p))==Math.signum(value(x)))
                         p=x;
                     else
@@ -217,8 +218,24 @@ public class Polynomial{
         // probaly checking and rp removing is unnecessary bcause of 194th line
         //
 
-        Float[] ans=Roots.toArray(new Float[0]);//
+        Double[] ans=Roots.toArray(new Double[0]);//
         return ans;
+    }
+    Double smallestRoot(Double b)
+    {
+        return smallestRoot(0.0,b);
+    }
+    Double smallestRoot(Double a,Double b)
+    {
+        Double[] Roots=roots();
+        for(int i=0;i<Roots.length;i++)
+        {
+            if(Roots[i]>b)
+                break;
+            if(Roots[i]>a)
+                return Roots[i];
+        }
+        return a-1.0;
     }
     
     @Deprecated //definitly NOT working
@@ -230,7 +247,7 @@ public class Polynomial{
         {
             System.out.println("ERROR: Dividng by zero polynomial");
             Polynomial q=new Polynomial();
-            float NAN = 1.f/0.f;
+            Double NAN = (Double)1.0/(Double)0.0;
             q.Coefficients.add(NAN);
             return q;
         }
@@ -244,12 +261,12 @@ public class Polynomial{
             int nsiz;
             nsiz=Coefficients.size()-P.Coefficients.size()+1;
             while(q.Coefficients.size()<nsiz){
-                q.Coefficients.add(0.f);
+                q.Coefficients.add((Double)0.0);
             }
             Polynomial r=this;
             while(r.Coefficients.size()>0 && r.Coefficients.size()>=P.Coefficients.size())
             {
-                float t;
+                Double t;
                 int i;
                 t=r.Coefficients.get(r.Coefficients.size()-1)/P.Coefficients.get(P.Coefficients.size()-1);
                 i=r.Coefficients.size()-P.Coefficients.size();
